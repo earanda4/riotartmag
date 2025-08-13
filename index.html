@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Artist Revolution</title>
+    <!-- Tailwind CSS CDN for basic utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for body, Permanent Marker for headings -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for chaotic and advanced design - LIGHT THEME */
+        :root {
+            --primary-bg: #f0f0f0; /* Light background */
+            --secondary-bg: #ffffff; /* Even lighter for cards/sections */
+            --accent-color-1: #e74c3c; /* Orange-Red, remains vibrant */
+            --accent-color-2: #00ffff; /* Cyan, remains vibrant */
+            --text-color-light: #333333; /* Dark text for light background */
+            --text-color-dark: #f0f0f0; /* Light text for dark elements (e.g., hover states) */
+            --border-radius-lg: 1rem;
+            --chaos-speed: 0.02;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-color-light);
+            overflow-x: hidden; /* Prevent horizontal scroll due to transforms */
+            margin: 0;
+            padding: 0;
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Canvas for the generative background */
+        #chaotic-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Send it to the back */
+            opacity: 0.1; /* Make it subtle for light background */
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            z-index: 1; /* Bring content above canvas */
+            position: relative;
+        }
+
+        /* Header styling */
+        .header {
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+            overflow: hidden; /* Hide overflowing elements from skewed text */
+        }
+
+        .header h1 {
+            font-family: 'Permanent Marker', cursive; /* Apply new font */
+            font-size: clamp(3rem, 10vw, 8rem); /* Responsive font size */
+            font-weight: 900;
+            line-height: 0.8;
+            color: var(--accent-color-1);
+            text-shadow: 0.25rem 0.25rem rgba(0, 0, 0, 0.2); /* Darker shadow for light background */
+            position: relative;
+            display: inline-block; /* Allows transform to affect its own space */
+            transition: transform 0.3s ease-out, text-shadow 0.3s ease-out;
+            transform: skewX(-15deg); /* Initial chaotic skew */
+            will-change: transform, text-shadow; /* Optimize for animation */
+        }
+
+        .header h1:hover {
+            transform: skewX(-5deg) scale(1.02);
+            text-shadow: 0.35rem 0.35rem rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            max-width: 800px;
+            margin: 1rem auto 0;
+            color: var(--text-color-light);
+            opacity: 0.9; /* Slightly higher opacity for text */
+            transform: translateY(10px); /* Subtle shift */
+            animation: fadeInSlightly 1s ease-out forwards;
+            animation-delay: 0.5s;
+            opacity: 0; /* Start hidden for animation */
+        }
+
+        @keyframes fadeInSlightly {
+            to {
+                opacity: 0.9;
+                transform: translateY(0);
+            }
+        }
+
+        /* Linktree-inspired section */
+        .links-section {
+            padding: 2rem 1rem;
+            max-width: 600px; /* Constrain width like Linktree */
+            margin: 2rem auto; /* Center the section */
+            text-align: center;
+        }
+
+        .links-section h2 {
+            font-family: 'Permanent Marker', cursive;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--accent-color-1);
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px rgba(0, 0, 0, 0.2); /* Darker shadow */
+        }
+
+        .link-button {
+            display: block; /* Each link on its own line */
+            width: 100%;
+            padding: 1.25rem 1rem;
+            margin-bottom: 1rem;
+            background-color: var(--secondary-bg);
+            color: var(--text-color-light);
+            text-decoration: none;
+            border-radius: var(--border-radius-lg);
+            border: 2px solid var(--accent-color-2); /* Cyan border */
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: all 0.3s ease-out;
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1); /* Lighter shadow */
+            transform: skewX(0deg); /* Initial state */
+            will-change: transform, box-shadow, background-color, color;
+            letter-spacing: 0.05em;
+        }
+
+        .link-button:hover {
+            background-color: var(--accent-color-1); /* Orange-red on hover */
+            color: var(--text-color-dark); /* White text on accent background */
+            border-color: var(--accent-color-1);
+            transform: skewX(-5deg) scale(1.02); /* Chaotic skew on hover */
+            box-shadow: 0 0.5rem 1.5rem rgba(231, 76, 60, 0.5); /* Accent color glow */
+        }
+
+        /* Slideshow specific styles */
+        .slideshow-container {
+            max-width: 800px; /* Max width for the slideshow */
+            position: relative;
+            margin: auto;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden; /* Ensures content stays within rounded corners */
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+            background-color: var(--secondary-bg);
+        }
+
+        .art-card {
+            display: none; /* Hidden by default */
+            position: relative;
+            background-color: var(--secondary-bg); /* Ensure card background on top of slideshow container */
+            border-radius: var(--border-radius-lg); /* Keep inner rounded corners */
+            overflow: hidden; /* For image */
+            box-shadow: none; /* Remove individual card shadow as container has one */
+            flex-direction: column;
+            min-height: auto; /* Allow height to adjust for image and text */
+            animation-name: fade;
+            animation-duration: 1.5s;
+        }
+
+        /* Fade animation */
+        @keyframes fade {
+            from {opacity: .4}
+            to {opacity: 1}
+        }
+
+        .art-card.active {
+            display: flex; /* Show the active slide */
+        }
+
+        .art-image {
+            width: 100%;
+            height: 400px; /* Fixed height for consistency */
+            object-fit: cover;
+            object-position: center;
+            /* No filter/transform on hover here, controlled by slideshow transition */
+        }
+
+        .art-info {
+            padding: 2rem;
+            text-align: center; /* Center info text for slideshow */
+        }
+
+        .art-info h3 {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .art-info p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        /* Next & previous buttons */
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 1rem 1.2rem;
+            margin-top: -22px;
+            color: var(--accent-color-1); /* Accent color for arrows */
+            font-weight: bold;
+            font-size: 2.5rem;
+            transition: 0.6s ease;
+            border-radius: 0 0.5rem 0.5rem 0;
+            user-select: none;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 2; /* Ensure buttons are above content */
+        }
+
+        /* Position the "next button" to the right */
+        .next {
+            right: 0;
+            border-radius: 0.5rem 0 0 0.5rem;
+        }
+
+        /* On hover, add a darker background color and brighter text */
+        .prev:hover, .next:hover {
+            background-color: var(--accent-color-2);
+            color: var(--primary-bg);
+        }
+
+        /* Responsive Adjustments for slideshow */
+        @media (max-width: 768px) {
+            .art-image {
+                height: 300px;
+            }
+            .art-info {
+                padding: 1rem;
+            }
+            .art-info h3 {
+                font-size: 1.5rem;
+            }
+            .art-info p {
+                font-size: 0.95rem;
+            }
+            .prev, .next {
+                padding: 0.75rem 1rem;
+                font-size: 2rem;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            margin-top: auto; /* Push footer to the bottom */
+            background-color: rgba(0, 0, 0, 0.05); /* Very light background for footer */
+            color: rgba(51, 51, 51, 0.6); /* Darker text for footer */
+            border-top: 1px dashed rgba(0, 0, 0, 0.1); /* Darker dashed border */
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--accent-color-1); /* Accent color for links */
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .footer a:hover {
+            color: var(--accent-color-2); /* Secondary accent on hover */
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Canvas for dynamic background -->
+    <canvas id="chaotic-canvas"></canvas>
+
+    <div class="container">
+        <header class="header">
+            <h1>THE ARTIST REVOLUTION</h1>
+            <p><strong>ART WILL SAVE US.</strong> Our practice follows a unique cycle: order, chaos, disorder—the inception point of our art. We celebrate all forms: the art of community, the art of mess, the art of unclear ideas, and the art of nature. Embrace the beautiful disarray and find value in the inevitable return to disorder.</p>
+        </header>
+
+        <!-- New Linktree-inspired section -->
+        <section class="links-section">
+            <h2>Connect & Explore</h2>
+            <a href="https://example.com/gallery" class="link-button">View Our Full Gallery</a>
+            <a href="https://example.com/shop" class="link-button">Shop Original Artworks</a>
+            <a href="https://example.com/contact" class="link-button">Get in Touch</a>
+            <a href="https://example.com/about" class="link-button">Learn About Our Philosophy</a>
+            <a href="https://example.com/blog" class="link-button">Read Our Art Blog</a>
+            <a href="https://example.com/socials" class="link-button">Follow Us on Socials</a>
+        </section>
+
+        <!-- Slideshow Container -->
+        <div class="slideshow-container">
+            <!-- Art Card 1 -->
+            <div class="art-card fade">
+                <img src="https://placehold.co/800x400/e74c3c/333333?text=Abstract+Rupture" alt="Abstract Rupture" class="art-image">
+                <div class="art-info">
+                    <h3>Abstract Rupture</h3>
+                    <p>A spontaneous combustion of lines and colors, reflecting fragmented realities and raw emotion. This piece embodies the **art of mess**, finding beauty in disruption.</p>
+                </div>
+            </div>
+
+            <!-- Art Card 2 -->
+            <div class="art-card fade">
+                <img src="https://placehold.co/800x400/00ffff/333333?text=Syntactic+Noise" alt="Syntactic Noise" class="art-image">
+                <div class="art-info">
+                    <h3>Syntactic Noise</h3>
+                    <p>Layers of digital static and organic forms merge, creating a symphony of visual dissonance. It challenges perception, inviting the viewer to engage with **unclear ideas** and redefine order.</p>
+                </div>
+            </div>
+
+            <!-- Art Card 3 -->
+            <div class="art-card fade">
+                <img src="https://placehold.co/800x400/8000ff/333333?text=Fractured+Dream" alt="Fractured Dream" class="art-image">
+                <div class="art-info">
+                    <h3>Fractured Dream</h3>
+                    <p>A haunting landscape of disjointed memories, rendered in vibrant, clashing hues. This piece delves into the **art of nature**, mirroring its unpredictable and raw beauty.</p>
+                </div>
+            </div>
+
+            <!-- Art Card 4 -->
+            <div class="art-card fade">
+                <img src="https://placehold.co/800x400/ffbf00/333333?text=Oblique+Perspectives" alt="Oblique Perspectives" class="art-image">
+                <div class="art-info">
+                    <h3>Oblique Perspectives</h3>
+                    <p>Geometric chaos intertwined with organic flow, forcing the eye to navigate impossible angles and shifting dimensions. A study in intentional imbalance, fostering **community** through shared interpretation.</p>
+                </div>
+            </div>
+
+            <!-- Art Card 5 -->
+            <div class="art-card fade">
+                <img src="https://placehold.co/800x400/00ff80/333333?text=Distorted+Reality" alt="Distorted Reality" class="art-image">
+                <div class="art-info">
+                    <h3>Distorted Reality</h3>
+                    <p>Familiar forms rendered unfamiliar through a lens of digital manipulation and painterly abstraction. It questions the very nature of perception, aligning with the **art of unclear ideas**.</p>
+                </div>
+            </div>
+
+            <!-- Art Card 6 -->
+            <div class="art-card fade">
+                <img src="https://placehold.co/800x400/ff5733/333333?text=Echoes+of+Glitch" alt="Echoes+of+Glitch" class="art-image">
+                <div class="art-info">
+                    <h3>Echoes of Glitch</h3>
+                    <p>Celebrating the beauty found in digital errors, this piece captures transient moments of disruption, turning imperfections into striking visual narratives of **mess** and unexpected beauty.</p>
+                </div>
+            </div>
+
+            <!-- Previous and Next buttons -->
+            <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+            <a class="next" onclick="plusSlides(1)">&#10095;</a>
+        </div>
+
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 The Artist Revolution. All rights reserved. <a href="#">Privacy Policy</a> | <a href="#">Contact Us</a></p>
+    </footer>
+
+    <script>
+        // JavaScript for chaotic background and slideshow functionality
+
+        // --- Canvas Background Animation ---
+        const canvas = document.getElementById('chaotic-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const numParticles = 80;
+        const maxRadius = 2;
+        const connectionDistance = 120;
+
+        // Resize canvas to fill window
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = []; // Clear and re-initialize particles on resize
+            initParticles();
+        }
+
+        // Particle constructor
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * maxRadius + 0.5;
+                this.color = `hsla(${Math.random() * 360}, 70%, 50%, 0.8)`; /* Adjusted for light background */
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 0.5,
+                    y: (Math.random() - 0.5) * 0.5
+                };
+            }
+
+            // Draw particle
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            // Update particle position and handle boundaries
+            update() {
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+
+                // Bounce off walls
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.velocity.x *= -1;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.velocity.y *= -1;
+                }
+
+                this.draw();
+            }
+        }
+
+        // Initialize particles
+        function initParticles() {
+            for (let i = 0; i < numParticles; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        // Connect particles with lines
+        function connectParticles() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    const dist = Math.sqrt(
+                        Math.pow(particles[a].x - particles[b].x, 2) +
+                        Math.pow(particles[a].y - particles[b].y, 2)
+                    );
+
+                    if (dist < connectionDistance) {
+                        ctx.strokeStyle = `rgba(0, 255, 255, ${0.5 - (dist / connectionDistance / 2)})`; /* Cyan connection, lower opacity for light theme */
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Animation loop for canvas
+        function animateCanvas() {
+            requestAnimationFrame(animateCanvas);
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+            }
+            connectParticles();
+        }
+
+        // --- Slideshow Functionality ---
+        let slideIndex = 1;
+
+        // Next/previous controls
+        function plusSlides(n) {
+            showSlides(slideIndex += n);
+        }
+
+        // Displays the current slide
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("art-card");
+            if (n > slides.length) {slideIndex = 1}
+            if (n < 1) {slideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].classList.remove('active'); /* Remove active class from all slides */
+            }
+            slides[slideIndex-1].classList.add('active'); /* Add active class to current slide */
+        }
+
+        // Initialize on window load
+        window.onload = function() {
+            resizeCanvas(); // Initial canvas resize
+            animateCanvas(); // Start canvas animation
+            showSlides(slideIndex); // Show the first slide
+        };
+
+        // Resize canvas when window is resized
+        window.addEventListener('resize', resizeCanvas);
+
+    </script>
+</body>
+</html>
